@@ -19,7 +19,7 @@ class FLDigitalTwin:
         self.config = config
     
     # Function to load all sheets from an Excel file into a dictionary with error handling
-    def load_data(file_path, sheets):
+    def load_data(self, file_path, sheets):
         data_dict = {}
         for key, sheet in sheets.items():
             try:
@@ -101,7 +101,7 @@ class FLDigitalTwin:
         df["Daily Value"] = df.iloc[:, 1:-1].sum(axis=1)
         sc_X = StandardScaler()
         daily_consumption = df["Daily Value"]
-        num_train = int(TRAIN_SIZE * len(daily_consumption))
+        num_train = int(self.config['TRAIN_SIZE'] * len(daily_consumption))
         daily_consumption_scaled = sc_X.fit_transform(
             daily_consumption.values.reshape(-1, 1)
         )
@@ -119,8 +119,8 @@ class FLDigitalTwin:
         model.fit(
             x_train,
             y_train,
-            epochs=EPOCHS,
-            batch_size=BATCH_SIZE,
+            epochs=self.config['EPOCHS'],
+            batch_size=self.config['BATCH_SIZE'],
             verbose=1,
             callbacks=[tensorboard_callback, early_stopping],
             # callbacks=[tensorboard_callback],
@@ -143,7 +143,7 @@ class FLDigitalTwin:
             ]
             for i in range(len(models)):
                 models[i].set_weights(new_weights)
-                history = models[i].fit(x_train, y_train, epochs=CLIENT_EPOCHS, batch_size=BATCH_SIZE, verbose=1)
+                history = models[i].fit(x_train, y_train, epochs=self.config['CLIENT_EPOCHS'], batch_size=self.config['BATCH_SIZE'], verbose=1)
                 history_dict[str(r)][str(i)] = history.history
 
         return history_dict
@@ -212,7 +212,7 @@ class FLDigitalTwin:
             ]
             for i in range(len(models)):
                 models[i].set_weights(new_weights)
-                history = models[i].fit(x_train, y_train, epochs=CLIENT_EPOCHS, batch_size=BATCH_SIZE, verbose=1)
+                history = models[i].fit(x_train, y_train, epochs=self.config['CLIENT_EPOCHS'], batch_size=self.config['BATCH_SIZE'], verbose=1)
                 history_dict[str(r)][str(i)] = history.history
                 
                 # Save weights
