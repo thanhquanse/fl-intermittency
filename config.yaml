@@ -1,0 +1,36 @@
+# Dataset config
+DATASET: "electricity"
+# Number of data sheets to be loaded
+NUM_DATA_SHEETS: 10
+# Number of models in the federated learning setup
+NUM_CLIENTS: 10
+# Number of previous time points used for forecasting the next point
+LOOK_BACK: 7
+# Number of epochs for training
+EPOCHS: 60
+# Number of client epochs
+CLIENT_EPOCHS: 10
+# Number of batch size
+BATCH_SIZE: 32
+# Interval at which to save weights
+SAVE_INTERVAL: 1
+# Initial learning rate
+LEARNING_RATE: 0.01
+# Train-test size
+TRAIN_SIZE: 0.7
+# Data dir
+DATA_DIR: "data"
+# Client update matrix dir
+CLIENT_MATRIX_DIR: "client_matrix"
+# FL output dir
+FL_OUTPUT_DIR: "federated_output"
+# General output dir
+GENERAL_OUTPUT_DIR: "summary_output"
+# Methods
+PREFIX: "avg"
+# Missing rules
+PERCENTAGE_MISSING_CLIENT: "01" #means 10%
+MISSING_MODE: "noadjacency"
+MATRIX_MISSING_LENGTH: "10x10"
+# Weight tracking directory
+WEIGHT_TRACKING_DIR: "weights_tracking_models/{{DATASET}}/{{PREFIX}}/{{MATRIX_MISSING_LENGTH}}/{{MISSING_MODE}}/{{PERCENTAGE_MISSING_CLIENT}}"
