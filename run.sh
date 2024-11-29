@@ -19,18 +19,19 @@ DATASET="electricity weather traffic psm"
 METHODS="normal avg weight"
 PERCENT_MC="01 02 03 04 05"
 MISSING_MODE="noadjacency 2adjacency 3adjacency 4adjacency 5adjacency"
-WEIGHT_MECHANISM="0 1"
+WEIGHT_MECHANISM="1"
 
 for ds in $DATASET; do
     for mt in $METHODS; do
         if [ "$mt" != "normal" ]; then
             for pmc in $PERCENT_MC; do
                 for mm in $MISSING_MODE; do
-                    for wm in $WEIGHT_MECHANISM; do
-                        echo "Processing $ds - $mt - $pmc - $mm - $wm..."
-                        python run.py --dataset $ds --prefix $mt --percent_mc $pmc --missing_mode $mm --weight_mechanism $wm
-                        echo "Done"
-                    done
+                    if [ "$mt" = "avg" ]; then
+                        WEIGHT_MECHANISM="0"
+                    fi
+                    echo "Processing $ds - $mt - $pmc - $mm - $WEIGHT_MECHANISM..."
+                    python run.py --dataset $ds --prefix $mt --percent_mc $pmc --missing_mode $mm --weight_mechanism $WEIGHT_MECHANISM
+                    echo "Done"
                 done
             done
         else
