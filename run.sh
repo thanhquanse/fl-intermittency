@@ -38,6 +38,9 @@ for ds in $DATASET; do
             echo "Processing $ds - $mt..."
             python run.py --dataset $ds --prefix $mt
             echo "Done"
+            echo
+            echo
+            echo
         fi
     done
 done

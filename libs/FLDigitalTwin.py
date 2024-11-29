@@ -198,12 +198,17 @@ class FLDigitalTwin:
             for i in range(len(models)):
                 if r >= 2 and client_matrix[r, i] == 'N':
                     if has_weights_mechanism:
-                        prev_csv_1 = f'weights_tracking_models/weights_tracking_model_client_{str(i)}_round_{str(r - 2)}.csv'
-                        prev_csv_2 = f'weights_tracking_models/weights_tracking_model_client_{str(i)}_round_{str(r - 1)}.csv'
+                        csv_filename1 = f'model_client_{str(i)}_round_{str(r - 2)}.csv'
+                        csv_filename2 = f'model_client_{str(i)}_round_{str(r - 1)}.csv'
+
+                        prev_csv_1 = os.path.join(self.config['WEIGHT_TRACKING_DIR'], csv_filename1)
+                        prev_csv_2 = os.path.join(self.config['WEIGHT_TRACKING_DIR'], csv_filename2)
+                        
                         self.sum_weights_from_two_csvs(prev_csv_1, prev_csv_2, models[i])
                         print(f"Updated weights using the sum of round {r - 1} and {r - 2}")
                     else:
-                        continue
+                        zero_w = [0.0*np.random.rand(*w.shape) for w in models[i].get_weights()]
+                        models[i].set_weights(zero_w)
                 
                 weights.append(models[i].get_weights())
             
@@ -217,7 +222,8 @@ class FLDigitalTwin:
                 
                 # Save weights
                 if has_weights_mechanism:
-                    csv_file = f'weights_tracking_models/weights_tracking_model_client_{str(i)}_round_{str(r)}.csv'
+                    csv_filename = f'model_client_{str(i)}_round_{str(r)}.csv'
+                    csv_file = os.path.join(self.config['WEIGHT_TRACKING_DIR'], csv_filename)
                     self.save_weights_to_csv(models[i], csv_file)
                     print(f"Saved weights to {csv_file}")
             
