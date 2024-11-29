@@ -3,16 +3,13 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-import datetime as dt
 import csv
 import json
-import tensorflow as tf
 
 from sklearn.preprocessing import StandardScaler
 from keras.models import Sequential
 from keras.layers import LSTM, Dense
 from keras.callbacks import TensorBoard, EarlyStopping
-from statsmodels.tsa.seasonal import seasonal_decompose
 
 class FLDigitalTwin:
     def __init__(self, config) -> None:
@@ -132,7 +129,7 @@ class FLDigitalTwin:
         model.evaluate(x_test, y_test)
 
     # Federated learning aggregation sections
-    def federated_averaging(self, models, x_train, y_train, rounds=10):
+    def train_fl_full_updates(self, models, x_train, y_train, rounds=10):
         history_dict = {}
         for r in range(rounds):
             print(f"Round {r}:")
@@ -189,7 +186,7 @@ class FLDigitalTwin:
         ]
         model.set_weights(reshaped_weights)
 
-    def federated_weighing(self, models, x_train, y_train, client_matrix, round=10, has_weights_mechanism=False):
+    def train_fl_digital_twin(self, models, x_train, y_train, client_matrix, round=10, has_weights_mechanism=False):
         history_dict = {}    
         for r in range(round):
             print(f"Round {r}:")
