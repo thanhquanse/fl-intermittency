@@ -129,7 +129,7 @@ class FLDigitalTwin:
         model.evaluate(x_test, y_test)
 
     # Federated learning aggregation sections
-    def train_fl_full_updates(self, models, x_train, y_train, rounds=10):
+    def train_fl_full_updates(self, models, x_train, y_train, x_test, y_test, rounds=10):
         history_dict = {}
         for r in range(rounds):
             print(f"Round {r}:")
@@ -140,7 +140,7 @@ class FLDigitalTwin:
             ]
             for i in range(len(models)):
                 models[i].set_weights(new_weights)
-                history = models[i].fit(x_train, y_train, epochs=self.config['CLIENT_EPOCHS'], batch_size=self.config['BATCH_SIZE'], verbose=1)
+                history = models[i].fit(x_train, y_train, validation_data=(x_test, y_test), epochs=self.config['CLIENT_EPOCHS'], batch_size=self.config['BATCH_SIZE'], verbose=1)
                 history_dict[str(r)][str(i)] = history.history
 
         return history_dict
@@ -186,7 +186,7 @@ class FLDigitalTwin:
         ]
         model.set_weights(reshaped_weights)
 
-    def train_fl_digital_twin(self, models, x_train, y_train, client_matrix, round=10, has_weights_mechanism=False):
+    def train_fl_digital_twin(self, models, x_train, y_train, x_test, y_test, client_matrix, round=10, has_weights_mechanism=False):
         history_dict = {}    
         for r in range(round):
             print(f"Round {r}:")
@@ -214,7 +214,7 @@ class FLDigitalTwin:
             ]
             for i in range(len(models)):
                 models[i].set_weights(new_weights)
-                history = models[i].fit(x_train, y_train, epochs=self.config['CLIENT_EPOCHS'], batch_size=self.config['BATCH_SIZE'], verbose=1)
+                history = models[i].fit(x_train, y_train, validation_data=(x_test, y_test), epochs=self.config['CLIENT_EPOCHS'], batch_size=self.config['BATCH_SIZE'], verbose=1)
                 history_dict[str(r)][str(i)] = history.history
                 
                 # Save weights
