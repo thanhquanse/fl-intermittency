@@ -19,7 +19,11 @@ def main(argv):
 
     with open(CONFIG_FILENAME,'w') as f:
         f.write(' '.join(argv))
-    output_filename = f"Results-{parser.dataset}-{parser.prefix}-{parser.matrix_ml}-{parser.missing_mode}-{parser.percent_mc}"
+    
+    if parser.prefix == 'normal':
+        output_filename = f"Results-{parser.dataset}-{parser.prefix}-{parser.matrix_ml}"
+    else:
+        output_filename = f"Results-{parser.dataset}-{parser.prefix}-{parser.matrix_ml}-{parser.missing_mode}-{parser.percent_mc}"
     os.system('jupyter nbconvert --execute --to notebook --output {:s} --output-dir {:s} {:s}'.format(output_filename, OUTPUT_DIR, IPYNB_FILENAME))
     return None
 
