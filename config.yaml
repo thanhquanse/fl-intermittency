@@ -17,7 +17,9 @@ SAVE_INTERVAL: 1
 # Initial learning rate
 LEARNING_RATE: 0.01
 # Train-test size
-TRAIN_SIZE: 0.7
+TRAIN_SIZE: 0.8
+# Training round
+TRAIN_ROUNDS: 10
 # Data dir
 DATA_DIR: "data"
 # Client update matrix dir

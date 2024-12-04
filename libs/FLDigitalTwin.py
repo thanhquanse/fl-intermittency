@@ -129,7 +129,7 @@ class FLDigitalTwin:
         model.evaluate(x_test, y_test)
 
     # Federated learning aggregation sections
-    def train_fl_full_updates(self, models, x_train, y_train, x_test, y_test, rounds=10):
+    def train_fl_full_updates(self, models, x_train, y_train, x_test, y_test, rounds=1):
         history_dict = {}
         for r in range(rounds):
             print(f"Round {r}:")
@@ -144,6 +144,27 @@ class FLDigitalTwin:
                 history_dict[str(r)][str(i)] = history.history
 
         return history_dict
+    
+    def _train_fl_full_updates(self, models, x_train, y_train, x_test, y_test, model_id, global_weights):
+        print(f"Training model {model_id}:")
+        
+        print(f"Updating global weights for model {model_id}...")
+        if len(global_weights) > 0:
+            models[model_id].set_weights(global_weights)
+        
+        history = models[model_id].fit(x_train, y_train, validation_data=(x_test, y_test), epochs=self.config['CLIENT_EPOCHS'], batch_size=self.config['BATCH_SIZE'], verbose=1)
+
+        # Loss
+        plt.figure(figsize=(10, 5))
+        plt.plot(history.history['loss'], label='Train')
+        plt.plot(history.history['val_loss'], label='Test')
+        plt.xlabel('Epoch')
+        plt.ylabel('Loss')
+        plt.legend()
+        plt.title(f'Model {model_id} Loss')
+        plt.show()
+
+        return history.history
 
     def save_weights_to_csv(self, model, filename):
         """Save the model weights to a CSV file."""
@@ -184,9 +205,10 @@ class FLDigitalTwin:
         reshaped_weights = [
             weight.reshape(layer.shape) for weight, layer in zip(summed_weights, model.weights)
         ]
-        model.set_weights(reshaped_weights)
+        # model.set_weights(reshaped_weights)
+        return reshaped_weights
 
-    def train_fl_digital_twin(self, models, x_train, y_train, x_test, y_test, client_matrix, round=10, has_weights_mechanism=False):
+    def train_fl_digital_twin(self, models, x_train, y_train, x_test, y_test, client_matrix, round=1, has_weights_mechanism=False):
         history_dict = {}    
         for r in range(round):
             print(f"Round {r}:")
