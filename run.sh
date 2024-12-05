@@ -15,11 +15,17 @@
 #     echo
 # done
 
-DATASET="electricity weather traffic psm"
+DATASET="electricity weather traffic solarpower m4 train psm"
 METHODS="normal avg weight"
 PERCENT_MC="01 02 03 04 05"
 MISSING_MODE="noadjacency 2adjacency 3adjacency 4adjacency 5adjacency"
 WEIGHT_MECHANISM="1"
+
+# DATASET="electricity"
+# METHODS="avg weight"
+# PERCENT_MC="03"
+# MISSING_MODE="3adjacency"
+# WEIGHT_MECHANISM="1"
 
 for ds in $DATASET; do
     for mt in $METHODS; do
@@ -32,6 +38,9 @@ for ds in $DATASET; do
                     echo "Processing $ds - $mt - $pmc - $mm - $WEIGHT_MECHANISM..."
                     python run.py --dataset $ds --prefix $mt --percent_mc $pmc --missing_mode $mm --weight_mechanism $WEIGHT_MECHANISM
                     echo "Done"
+                    echo
+                    echo
+                    echo
                 done
             done
         else
