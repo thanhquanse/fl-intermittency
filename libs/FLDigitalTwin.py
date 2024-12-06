@@ -30,7 +30,7 @@ class FLDigitalTwin:
     def visualize_data(self, df, title, xlabel, ylabel):
         sns.set_context("notebook", font_scale=1.5, rc={"lines.linewidth": 2.5})
         sns.set(rc={"figure.figsize": (15, 6)})
-        sns.histplot(df["Daily Value"], bins=50, kde=True, color="blue")
+        sns.histplot(df["value"], bins=50, kde=True, color="blue")
         plt.title(title)
         plt.xlabel(xlabel)
         plt.ylabel(ylabel)
@@ -95,9 +95,9 @@ class FLDigitalTwin:
 
     # Federated Learning Model Preparation
     def create_train_test_dataset(self, df, lookback):
-        df["Daily Value"] = df.iloc[:, 1:-1].sum(axis=1)
+        df["value"] = df.iloc[:, 1:-1].sum(axis=1)
         sc_X = StandardScaler()
-        daily_consumption = df["Daily Value"]
+        daily_consumption = df["value"]
         num_train = int(self.config['TRAIN_SIZE'] * len(daily_consumption))
         daily_consumption_scaled = sc_X.fit_transform(
             daily_consumption.values.reshape(-1, 1)

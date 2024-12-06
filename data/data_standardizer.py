@@ -188,12 +188,53 @@ def update_cell_value(file_path):
     print(f"Updated cell B2 in all sheets of {file_path}.")
 
 
+def move_value_to_sheet(input, output):
+    # Load the workbook
+    file_path = input  # Replace with your file path
+    workbook = load_workbook(file_path)
+
+    workbook = load_workbook(file_path)
+
+    # Access the first sheet
+    first_sheet = workbook.worksheets[0]
+
+    # Get the header and all rows of the first sheet
+    header = [cell.value for cell in first_sheet[1]]  # Assumes the first row is the header
+    all_rows = list(first_sheet.iter_rows(values_only=True))
+
+    # Get the first column values
+    first_column_values = [row[0] for row in all_rows[1:] if row[0] is not None]  # Exclude the header
+
+    # Create a new workbook for the output
+    new_workbook = Workbook()
+    new_workbook.remove(new_workbook.active)  # Remove the default empty sheet
+
+    # Loop through each column starting from the second column
+    for col_idx in range(1, first_sheet.max_column):  # Skip the first column (index 0)
+        new_sheet_name = f"Sheet_{col_idx}"  # Define the new sheet name
+        new_sheet = new_workbook.create_sheet(title=new_sheet_name)
+        
+        # Add first column values to the new sheet
+        new_sheet.cell(row=1, column=1, value=header[0])  # Set the header for the first column
+        for row_idx, value in enumerate(first_column_values, start=2):
+            new_sheet.cell(row=row_idx, column=1, value=value)
+        
+        # Add the corresponding column values to the new sheet
+        new_sheet.cell(row=1, column=2, value="value")  # Set the header for the second column
+        for row_idx, value in enumerate(all_rows[1:], start=2):  # Start from the second row (excluding the header)
+            new_sheet.cell(row=row_idx, column=2, value=value[col_idx])
+
+    # Save the new workbook
+    new_workbook.save(output)
+
 if __name__ == "__main__":
     # for dataset in ['weather', 'traffic' ,'train', 'psm']:
-    for dataset in ['m4']:
+    for dataset in ['weather']:
         # extract_first_110_columns(f"{dataset}/{dataset}.xlsx", f"{dataset}/{dataset}_1.xlsx")
         # move_and_append_columns_to_24_hour_sheets(f"{dataset}/{dataset}_1.xlsx", f"{dataset}/{dataset}_2.xlsx")
-        distribute_sheet_values(f"{dataset}/{dataset}.xlsx", f"{dataset}/{dataset}_2.xlsx")
+        # distribute_sheet_values(f"{dataset}/{dataset}.xlsx", f"{dataset}/{dataset}_2.xlsx")
         # extract_first_x_rows(f"{dataset}/{dataset}_2.xlsx", f"{dataset}/standard_{dataset}.xlsx")
         # move_columns_to_new_sheets(f"{dataset}/{dataset}_3.xlsx", f"{dataset}/standard_{dataset}.xlsx")
         # update_cell_value(f"{dataset}/standard_{dataset}.xlsx")
+
+        move_value_to_sheet(f"{dataset}/{dataset}.xlsx", f"{dataset}/standard_{dataset}_moved.xlsx")
