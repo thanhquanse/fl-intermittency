@@ -7,9 +7,9 @@ NUM_CLIENTS: 10
 # Number of previous time points used for forecasting the next point
 LOOK_BACK: 7
 # Number of epochs for training
-EPOCHS: 60
+EPOCHS: 50
 # Number of client epochs
-CLIENT_EPOCHS: 10
+CLIENT_EPOCHS: 20
 # Number of batch size
 BATCH_SIZE: 32
 # Interval at which to save weights
@@ -17,9 +17,9 @@ SAVE_INTERVAL: 1
 # Initial learning rate
 LEARNING_RATE: 0.01
 # Train-test size
-TRAIN_SIZE: 0.8
+TRAIN_SIZE: 0.7
 # Training round
-TRAIN_ROUNDS: 10
+TRAIN_ROUNDS: 20
 # Data dir
 DATA_DIR: "data"
 # Client update matrix dir
@@ -34,5 +34,6 @@ PREFIX: "avg"
 PERCENTAGE_MISSING_CLIENT: "01" #means 10%
 MISSING_MODE: "noadjacency"
 MATRIX_MISSING_LENGTH: "10x10"
+IS_CLUSTER: 'no'
 # Weight tracking directory
 WEIGHT_TRACKING_DIR: "weights_tracking_models/{{DATASET}}/{{PREFIX}}/{{MATRIX_MISSING_LENGTH}}/{{MISSING_MODE}}/{{PERCENTAGE_MISSING_CLIENT}}"

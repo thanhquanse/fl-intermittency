@@ -8,7 +8,8 @@ import json
 
 from sklearn.preprocessing import StandardScaler
 from keras.models import Sequential
-from keras.layers import LSTM, Dense
+from keras.layers import LSTM, Dense, Dropout
+from keras.optimizers import Adam
 from keras.callbacks import TensorBoard, EarlyStopping
 
 class FLDigitalTwin:
@@ -20,7 +21,18 @@ class FLDigitalTwin:
         data_dict = {}
         for key, sheet in sheets.items():
             try:
-                data_dict[key] = pd.read_excel(file_path, sheet_name=sheet)
+                data_dict[key] = pd.read_excel(file_path, sheet_name=sheet, skiprows=0, nrows=5000)
+                # data_dict[key] = pd.read_excel(file_path, sheet_name=sheet)
+                print(f"Loaded data for {key} from sheet {sheet}")
+            except Exception as e:
+                print(f"Failed to load data for {key} from sheet {sheet}: {e}")
+        return data_dict
+
+    def load_val_data(self, file_path, sheets):
+        data_dict = {}
+        for key, sheet in sheets.items():
+            try:
+                data_dict[key] = pd.read_excel(file_path, sheet_name=sheet, skiprows=5000, nrows=5000, names=['date', 'value'])
                 print(f"Loaded data for {key} from sheet {sheet}")
             except Exception as e:
                 print(f"Failed to load data for {key} from sheet {sheet}: {e}")
@@ -39,11 +51,13 @@ class FLDigitalTwin:
     # Function to create and compile the model
     def create_model(self, input_shape, output_shape):
         model = Sequential()
-        model.add(LSTM(64, input_shape=input_shape))
-        model.add(Dense(16, activation="sigmoid"))
+        model.add(LSTM(64, activation="tanh", input_shape=input_shape))
+        # model.add(Dropout(0.2))
+        model.add(Dense(32, activation="relu"))
+        # model.add(Dropout(0.2))
         model.add(Dense(output_shape))
         model.compile(
-            optimizer="adam", loss="mean_squared_error", metrics=["mse", "mae", "mape"]
+            optimizer=Adam(learning_rate=0.001, clipvalue=1.0), loss="mean_squared_error", metrics=["mse", "mae", "mape"]
         )
         return model
 
@@ -95,7 +109,7 @@ class FLDigitalTwin:
 
     # Federated Learning Model Preparation
     def create_train_test_dataset(self, df, lookback):
-        df["value"] = df.iloc[:, 1:-1].sum(axis=1)
+        # df["value"] = df.iloc[:, 1:-1].sum(axis=1)
         sc_X = StandardScaler()
         daily_consumption = df["value"]
         num_train = int(self.config['TRAIN_SIZE'] * len(daily_consumption))
@@ -146,23 +160,34 @@ class FLDigitalTwin:
         return history_dict
     
     def _train_fl_full_updates(self, models, x_train, y_train, x_test, y_test, model_id, global_weights):
+        early_stopping = EarlyStopping(
+            monitor="val_loss", min_delta=0.001, patience=3, verbose=1, mode="auto", restore_best_weights=True
+        )
+
         print(f"Training model {model_id}:")
         
         print(f"Updating global weights for model {model_id}...")
         if len(global_weights) > 0:
             models[model_id].set_weights(global_weights)
         
-        history = models[model_id].fit(x_train, y_train, validation_data=(x_test, y_test), epochs=self.config['CLIENT_EPOCHS'], batch_size=self.config['BATCH_SIZE'], verbose=1)
+        history = models[model_id].fit(
+            x_train, y_train,
+            validation_data=(x_test, y_test),
+            epochs=self.config['CLIENT_EPOCHS'],
+            batch_size=self.config['BATCH_SIZE'],
+            verbose=1,
+            callbacks=[early_stopping]
+        )
 
         # Loss
-        plt.figure(figsize=(10, 5))
-        plt.plot(history.history['loss'], label='Train')
-        plt.plot(history.history['val_loss'], label='Test')
-        plt.xlabel('Epoch')
-        plt.ylabel('Loss')
-        plt.legend()
-        plt.title(f'Model {model_id} Loss')
-        plt.show()
+        # plt.figure(figsize=(10, 5))
+        # plt.plot(history.history['loss'], label='Train')
+        # plt.plot(history.history['val_loss'], label='Test')
+        # plt.xlabel('Epoch')
+        # plt.ylabel('Loss')
+        # plt.legend()
+        # plt.title(f'Model {model_id} Loss')
+        # plt.show()
 
         return history.history
 

@@ -15,37 +15,52 @@
 #     echo
 # done
 
-DATASET="electricity weather traffic solarpower m4 train psm"
+# DATASET="electricity traffic solarpower m4 train psm"
+# METHODS="normal avg weight"
+# PERCENT_MC="01 02 03 04 05"
+# MISSING_MODE="noadjacency 2adjacency 3adjacency 4adjacency 5adjacency"
+# WEIGHT_MECHANISM="1"
+
+DATASET="electricity traffic"
 METHODS="normal avg weight"
-PERCENT_MC="01 02 03 04 05"
+PERCENT_MC="1 2 3 4 5"
 MISSING_MODE="noadjacency 2adjacency 3adjacency 4adjacency 5adjacency"
 WEIGHT_MECHANISM="1"
-
-# DATASET="electricity"
-# METHODS="avg weight"
-# PERCENT_MC="03"
-# MISSING_MODE="3adjacency"
-# WEIGHT_MECHANISM="1"
+IS_CLUSTER="no"
+MATRIX="20x10"
 
 for ds in $DATASET; do
     for mt in $METHODS; do
         if [ "$mt" != "normal" ]; then
             for pmc in $PERCENT_MC; do
-                for mm in $MISSING_MODE; do
-                    if [ "$mt" = "avg" ]; then
-                        WEIGHT_MECHANISM="0"
-                    fi
-                    echo "Processing $ds - $mt - $pmc - $mm - $WEIGHT_MECHANISM..."
-                    python run.py --dataset $ds --prefix $mt --percent_mc $pmc --missing_mode $mm --weight_mechanism $WEIGHT_MECHANISM
-                    echo "Done"
-                    echo
-                    echo
-                    echo
-                done
+                pm="0""$pmc"
+                if [ "$pmc" = "1" ]; then
+                    mm="noadjacency"
+                else
+                    mm="$pmc""adjacency"
+                fi
+
+                echo "Processing $IS_CLUSTER $ds - $mt - $pm - $mm - $MATRIX..."
+                python run.py --is_cluster $IS_CLUSTER --dataset $ds --prefix $mt --percent_mc $pm --missing_mode $mm --weight_mechanism $WEIGHT_MECHANISM --matrix_ml $MATRIX
+                echo "Done"
+                echo
+                echo
+                echo
+                # for mm in $MISSING_MODE; do
+                #     if [ "$mt" = "avg" ]; then
+                #         WEIGHT_MECHANISM="0"
+                #     fi
+                #     echo "Processing $ds - $mt - $pmc - $mm - $WEIGHT_MECHANISM..."
+                #     python run.py --dataset $ds --prefix $mt --percent_mc $pmc --missing_mode $mm --weight_mechanism $WEIGHT_MECHANISM
+                #     echo "Done"
+                #     echo
+                #     echo
+                #     echo
+                # done
             done
         else
-            echo "Processing $ds - $mt..."
-            python run.py --dataset $ds --prefix $mt
+            echo "Processing $IS_CLUSTER $ds - $mt - $MATRIX..."
+            python run.py --is_cluster $IS_CLUSTER --dataset $ds --prefix $mt --matrix_ml $MATRIX
             echo "Done"
             echo
             echo

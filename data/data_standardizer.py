@@ -5,6 +5,7 @@
 
 
 from openpyxl import load_workbook, Workbook
+import pandas as pd
 
 def extract_first_110_columns(input_file, output_file):
     # Load the workbook and the first sheet
@@ -227,9 +228,48 @@ def move_value_to_sheet(input, output):
     # Save the new workbook
     new_workbook.save(output)
 
+def split_uni_dataset(input, output):
+    # Load the Excel file
+    file_path = input  # Replace with your file path
+    workbook = load_workbook(file_path)
+
+    # Read the first sheet using pandas
+    sheet_name = workbook.sheetnames[0]  # Get the name of the first sheet
+    data = pd.read_excel(file_path, sheet_name=sheet_name)
+
+    # Calculate the size of each partition
+    partition_size = len(data) // 10
+
+    # Open the workbook with openpyxl to modify it
+    for i in range(10):
+        start_row = i * partition_size
+        end_row = start_row + partition_size if i < 9 else len(data)  # Ensure the last partition takes all remaining rows
+        partition = data.iloc[start_row:end_row]  # Extract the partition
+
+        # Add a new sheet with the appropriate name
+        new_sheet_name = f"sheet_{i + 1}"
+        if new_sheet_name in workbook.sheetnames:
+            workbook.remove(workbook[new_sheet_name])
+        new_sheet = workbook.create_sheet(title=new_sheet_name)
+
+        # Set headers for the new sheet
+        new_sheet.cell(row=1, column=1, value="date")
+        new_sheet.cell(row=1, column=2, value="value")
+
+        # Write the partition to the new sheet
+        for row_idx, row in enumerate(partition.values, start=2):  # Start writing data from the second row
+            for col_idx, value in enumerate(row, start=1):
+                new_sheet.cell(row=row_idx, column=col_idx, value=value)
+
+
+    # Save the modified Excel file
+    workbook.save(output)
+    print("Data has been split into 10 sheets successfully!")
+
+
 if __name__ == "__main__":
     # for dataset in ['weather', 'traffic' ,'train', 'psm']:
-    for dataset in ['weather']:
+    for dataset in ['ett']:
         # extract_first_110_columns(f"{dataset}/{dataset}.xlsx", f"{dataset}/{dataset}_1.xlsx")
         # move_and_append_columns_to_24_hour_sheets(f"{dataset}/{dataset}_1.xlsx", f"{dataset}/{dataset}_2.xlsx")
         # distribute_sheet_values(f"{dataset}/{dataset}.xlsx", f"{dataset}/{dataset}_2.xlsx")
@@ -237,4 +277,6 @@ if __name__ == "__main__":
         # move_columns_to_new_sheets(f"{dataset}/{dataset}_3.xlsx", f"{dataset}/standard_{dataset}.xlsx")
         # update_cell_value(f"{dataset}/standard_{dataset}.xlsx")
 
-        move_value_to_sheet(f"{dataset}/{dataset}.xlsx", f"{dataset}/standard_{dataset}_moved.xlsx")
+        # move_value_to_sheet(f"{dataset}/{dataset}.xlsx", f"{dataset}/standard_{dataset}_moved.xlsx")
+
+        split_uni_dataset(f"{dataset}/{dataset}.xlsx", f"{dataset}/{dataset}_uni.xlsx")
